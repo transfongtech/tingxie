@@ -1,0 +1,22 @@
+@font-face {
+  font-family: "LXGW WenKai Screen";
+  src: url("/fonts/LXGWWenKaiScreen.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "system-ui", "sans-serif";
+  --font-kaiti: "LXGW WenKai Screen", "FangSong", "STFangsong", "Kaiti SC", "STKaiti", "AR PL UKai CN", "KaiTi", "SimKai", "MingLiU", "serif";
+  --color-primary: #4e73df;
+  --color-secondary: #858796;
+}
+
+@layer base {
+  body {
+    @apply antialiased bg-slate-50 text-slate-900;
+  }
+}

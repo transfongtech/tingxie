@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Week {
+  id            Int      @id @default(autoincrement())
+  number        Int
+  language      String   @default("zh") // "zh" or "en"
+  title         String
+  isActive      Boolean   @default(false)
+  startDate     DateTime?
+  dictationDate DateTime? // Target date for 听写
+  wordLists     WordList[]
+
+  @@unique([number, language])
+}
+
+model Word {
+  id        Int      @id @default(autoincrement())
+  content   String   @unique
+  addedAt   DateTime @default(now())
+  notes     String?
+  wordLists WordList[]
+  reviews   ReviewLog[]
+  progress  LearningProgress?
+}
+
+model WordList {
+  id     Int  @id @default(autoincrement())
+  weekId Int
+  week   Week @relation(fields: [weekId], references: [id])
+  wordId Int
+  word   Word @relation(fields: [wordId], references: [id])
+
+  @@unique([weekId, wordId])
+}
+
+model ReviewLog {
+  id         Int      @id @default(autoincrement())
+  wordId     Int
+  word       Word     @relation(fields: [wordId], references: [id])
+  reviewDate DateTime @default(now())
+  outcome    String   // "correct" or "wrong"
+  stage      Int      // e.g., 1, 2, 4, 7...
+}
+
+model LearningProgress {
+  id             Int      @id @default(autoincrement())
+  wordId         Int      @unique
+  word           Word     @relation(fields: [wordId], references: [id])
+  nextReviewDate DateTime
+  stage          Int      @default(0) // 0=new, 1=1d, 2=2d, etc.
+  lastReviewDate DateTime?
+  isMastered     Boolean  @default(false)
+  
+  updatedAt      DateTime @updatedAt
+}
