@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "description": "Synthetic handover-document review cases. Names, systems, links, and operational details are fictional.",
+  "cases": [
+    {
+      "id": "complete-handover",
+      "category": "complete",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample inventory dashboard handover",
+        "body": "The fictional inventory dashboard is ready for routine maintenance. Its purpose is to show sample stock levels and delayed shipments. The web client reads from a mocked service through the documented adapter. Run npm install and npm run dev, then open the local address printed by the tool. Run npm run lint before proposing changes. Configuration keys and safe example values are listed in the checked-in example environment file; no credentials belong in the repository. Deployments use the documented staging workflow, and rollback means selecting the previous successful artifact. Current limitations are slow filtering on large synthetic lists and missing keyboard shortcuts. Ownership transfers to the platform rotation, with questions tracked in the sample project queue. The architecture note, runbook, and decision log are linked in the repository index.",
+        "metadata": {
+          "declaredTopic": "inventory dashboard handover",
+          "attachments": []
+        }
+      },
+      "expected": {
+        "decision": "pass",
+        "findingCodes": []
+      }
+    },
+    {
+      "id": "incomplete-handover",
+      "category": "incomplete",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample notification service handover",
+        "body": "This service sends sample notifications. Install dependencies and start the development server with the repository defaults. The main queue adapter lives in the server package. Known issues include delayed retries during local testing. The fictional implementation accepts sample events, chooses a template, records a mock delivery attempt, and exposes a local status page. Unit checks cover template selection and malformed events. The adapter can be replaced for development without changing callers. Logs use generated identifiers and contain no personal data. This overview intentionally omits deployment, rollback, configuration, current ownership, escalation, monitoring, and links to supporting runbooks.",
+        "metadata": {
+          "declaredTopic": "notification service handover",
+          "attachments": []
+        }
+      },
+      "expected": {
+        "decision": "needs_revision",
+        "findingCodes": ["missing-sections"]
+      }
+    },
+    {
+      "id": "under-eighty-words",
+      "category": "under-80-word",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample catalog handover",
+        "body": "The sample catalog is stable. Run the local server, check the products page, and use the staging workflow for deployment. The maintainer should read the repository notes before changing the mock search adapter.",
+        "metadata": {
+          "declaredTopic": "catalog handover",
+          "attachments": []
+        }
+      },
+      "expected": {
+        "decision": "needs_revision",
+        "findingCodes": ["under-minimum-length"]
+      }
+    },
+    {
+      "id": "off-topic-submission",
+      "category": "off-topic",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample billing portal handover",
+        "body": "A community garden can be planned by grouping fictional plants according to light and water needs. Start with a paper sketch, leave wide paths between beds, and label each row. Herbs can sit near the entrance while taller plants remain at the back. A weekly checklist helps volunteers remember watering and pruning. Compost should be mixed into the sample soil before planting. None of these gardening notes describe the billing portal, its architecture, setup, deployment, ownership, limitations, or support process.",
+        "metadata": {
+          "declaredTopic": "billing portal handover",
+          "attachments": []
+        }
+      },
+      "expected": {
+        "decision": "needs_revision",
+        "findingCodes": ["off-topic"]
+      }
+    },
+    {
+      "id": "repeated-identical-phrase",
+      "category": "repeated-identical-phrase/error",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample reporting worker handover",
+        "body": "The reporting worker creates fictional weekly summaries. Follow the runbook for setup. Follow the runbook for setup. Follow the runbook for setup. The worker reads sample events and writes mock reports. Follow the runbook for setup. Follow the runbook for setup. Follow the runbook for setup. Sample jobs are scheduled once a week and use generated records only. Follow the runbook for setup. Follow the runbook for setup. Follow the runbook for setup. A local preview can display the resulting fictional totals. Follow the runbook for setup. Follow the runbook for setup. Follow the runbook for setup. Deployment details, rollback steps, current limitations, ownership, and escalation guidance are not provided.",
+        "metadata": {
+          "declaredTopic": "reporting worker handover",
+          "attachments": []
+        }
+      },
+      "expected": {
+        "decision": "needs_revision",
+        "findingCodes": ["repeated-identical-text"]
+      }
+    },
+    {
+      "id": "tense-heavy-history",
+      "category": "tense-heavy",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample import tool handover",
+        "body": "The team had designed the fictional import tool, had tested a prototype, was revising the parser, and would have reviewed its sample output. The team had discussed deployment, was considering monitoring, and would be deciding ownership. A developer had been examining retries and was going to document setup. Another developer would have been preparing rollback notes. The project had changed direction, was changing direction, and would continue changing direction. These historical and speculative statements do not establish the tool's current architecture, commands, deployed state, limitations, responsible role, or next actions.",
+        "metadata": {
+          "declaredTopic": "import tool handover",
+          "attachments": []
+        }
+      },
+      "expected": {
+        "decision": "needs_revision",
+        "findingCodes": ["tense-clarity"]
+      }
+    },
+    {
+      "id": "placeholder-content",
+      "category": "placeholder",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample scheduling console handover",
+        "body": "The scheduling console coordinates fictional jobs. Owner: [TEAM NAME]. Repository: <ADD LINK>. Setup command: TODO. Deployment workflow: TBD. Rollback contact: [INSERT CONTACT]. Known limitations: lorem ipsum. The console reads sample schedules from an adapter and displays their state, but the architecture section still says COMING SOON. Monitoring dashboard: [DASHBOARD URL]. Verification procedure: TO BE WRITTEN. Current environment: [ENVIRONMENT]. Support queue: ???. A sample adapter generates non-sensitive jobs for local demonstrations. Replace every placeholder with durable role-based ownership, repository-relative references, executable commands, current limitations, and tested recovery steps before this document is accepted.",
+        "metadata": {
+          "declaredTopic": "scheduling console handover",
+          "attachments": []
+        }
+      },
+      "expected": {
+        "decision": "needs_revision",
+        "findingCodes": ["placeholder-content"]
+      }
+    },
+    {
+      "id": "multimodal-metadata-mismatch",
+      "category": "multimodal-mismatch-metadata",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample search service handover",
+        "body": "The attached architecture diagram is the source of truth for the fictional search service. It should show a web client calling a search gateway, which reads from a sample index and emits mock metrics. Use the diagram together with the repository runbook to understand setup, deployment, rollback, and ownership. The document claims the attachment is an image named search-architecture.png, but supplied metadata describes a plain-text release checklist for an unrelated sample application. Review must flag that disagreement rather than infer unseen diagram content.",
+        "metadata": {
+          "declaredTopic": "search service handover",
+          "attachments": [
+            {
+              "name": "release-checklist.txt",
+              "mediaType": "text/plain",
+              "declaredPurpose": "release checklist for sample calendar application"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "decision": "needs_revision",
+        "findingCodes": ["multimodal-metadata-mismatch"]
+      }
+    },
+    {
+      "id": "polished-rewrite-drift",
+      "category": "polished-rewrite-drift",
+      "synthetic": true,
+      "submission": {
+        "title": "Sample export service handover",
+        "body": "The fictional export service currently supports manual staging releases only. It stores generated sample files for one day, has no automatic rollback, and is owned by the platform rotation. Operators run the repository health command after release. A proposed polished rewrite says releases are fully automated, files are retained for thirty days, rollback is instant, and a dedicated export team provides continuous support. Those additions sound confident but contradict the source facts. A useful review must preserve the manual process, one-day retention, absent rollback automation, and role-based owner instead of silently improving them.",
+        "metadata": {
+          "declaredTopic": "export service handover",
+          "attachments": [],
+          "rewriteCandidate": "The export service uses fully automated releases, retains files for thirty days, provides instant rollback, and is continuously supported by a dedicated export team."
+        }
+      },
+      "expected": {
+        "decision": "needs_revision",
+        "findingCodes": ["rewrite-factual-drift"]
+      }
+    }
+  ]
+}

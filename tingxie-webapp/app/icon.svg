@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818CF8" />
+      <stop offset="100%" stop-color="#4338CA" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#312E81" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- Purple Rounded Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Massive Notebook -->
+  <g filter="url(#shadow)">
+    <!-- Back page -->
+    <rect x="96" y="88" width="320" height="352" rx="24" fill="#E2E8F0" />
+    <!-- Front page -->
+    <rect x="88" y="96" width="320" height="352" rx="24" fill="#FFFFFF" />
+    
+    <!-- Notebook Header -->
+    <path d="M 88 120 C 88 106.745 98.745 96 112 96 L 384 96 C 397.255 96 408 106.745 408 120 L 408 176 L 88 176 Z" fill="#6366F1" />
+    
+    <!-- Thick Ruled Lines for legibility at small scale -->
+    <rect x="136" y="230" width="224" height="24" rx="12" fill="#E0E7FF" />
+    <rect x="136" y="310" width="144" height="24" rx="12" fill="#E0E7FF" />
+  </g>
+
+  <!-- Golden Star -->
+  <path d="M 360 270 L 372 315 L 420 320 L 380 345 L 392 390 L 360 360 L 328 390 L 340 345 L 300 320 L 348 315 Z" fill="#FBBF24" />
+
+  <!-- Chunky Yellow Pencil Overlay -->
+  <g filter="url(#shadow)" transform="translate(266, 266) rotate(35) translate(-256, -256)">
+    <!-- Wood Tip -->
+    <polygon points="256,430 208,310 304,310" fill="#FDE68A" />
+    <!-- Lead Tip -->
+    <polygon points="256,430 240,390 272,390" fill="#312E81" />
+    <!-- Main Body (Yellow) -->
+    <rect x="208" y="110" width="96" height="200" fill="#FBBF24" />
+    <!-- Body Highlight (Darker Yellow) -->
+    <rect x="208" y="110" width="32" height="200" fill="#F59E0B" />
+    <!-- Metal Band -->
+    <rect x="208" y="60" width="96" height="50" fill="#94A3B8" />
+    <rect x="208" y="70" width="96" height="10" fill="#64748B" />
+    <rect x="208" y="90" width="96" height="10" fill="#64748B" />
+    <!-- Eraser (Red/Pink) -->
+    <path d="M 208 60 L 304 60 L 304 30 C 304 -5, 208 -5, 208 30 Z" fill="#F87171" />
+  </g>
+</svg>

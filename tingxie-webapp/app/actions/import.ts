@@ -1,78 +1,110 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { safeRevalidatePath } from "@/lib/server-utils";
 
-const prisma = new PrismaClient();
+export interface StructuredUnitInput {
+  number: number;
+  title: string;
+  grade: number;
+  term: number;
+  language: string; // "zh" | "en"
+  items: string[];
+}
 
-export async function saveWords(formData: FormData) {
-    const weekNumber = parseInt(formData.get("week") as string);
-    const rawContent = formData.get("content") as string;
+export async function importStructuredUnits(units: StructuredUnitInput[]) {
+  try {
+    let totalAdded = 0;
+    for (const unit of units) {
+      const week = await prisma.week.upsert({
+        where: {
+          number_language_grade_term: {
+            number: unit.number,
+            language: unit.language || "zh",
+            grade: unit.grade || 4,
+            term: unit.term || 2,
+          },
+        },
+        update: {
+          title: unit.title,
+          isActive: true,
+        },
+        create: {
+          number: unit.number,
+          title: unit.title,
+          language: unit.language || "zh",
+          grade: unit.grade || 4,
+          term: unit.term || 2,
+          isActive: true,
+        },
+      });
 
-    if (!weekNumber || !rawContent) {
-        return { success: false, message: "Missing week number or content" };
-    }
+      for (const itemText of unit.items) {
+        const trimmed = itemText.trim();
+        if (!trimmed) continue;
 
-    // Parse words: split by comma, newline, or Chinese comma
-    const words = rawContent
-        .split(/[\n,，]+/)
-        .map(w => w.trim())
-        .filter(w => w.length > 0);
-
-    if (words.length === 0) {
-        return { success: false, message: "No valid words found" };
-    }
-
-    try {
-        // 1. Upsert Week
-        // 1. Upsert Week
-        const week = await prisma.week.upsert({
-            where: {
-                number_language: {
-                    number: weekNumber,
-                    language: "zh"
-                }
-            },
-            update: {},
-            create: {
-                number: weekNumber,
-                title: `Week ${weekNumber}`,
-                isActive: true, // Default to active if just imported
-                language: "zh"
-            },
+        const wordObj = await prisma.word.upsert({
+          where: { content: trimmed },
+          update: {},
+          create: { content: trimmed },
         });
 
-        // 2. Process Words
-        let addedCount = 0;
-        for (const wordText of words) {
-            // Create word if not exists
-            const word = await prisma.word.upsert({
-                where: { content: wordText },
-                update: {},
-                create: { content: wordText },
-            });
-
-            // Link to Week (WordList)
-            await prisma.wordList.upsert({
-                where: {
-                    weekId_wordId: {
-                        weekId: week.id,
-                        wordId: word.id,
-                    },
-                },
-                update: {},
-                create: {
-                    weekId: week.id,
-                    wordId: word.id,
-                },
-            });
-            addedCount++;
-        }
-
-        revalidatePath("/");
-        return { success: true, message: `Successfully added ${addedCount} words to Week ${weekNumber}` };
-    } catch (error) {
-        console.error("Import error:", error);
-        return { success: false, message: "Failed to save words to database" };
+        await prisma.wordList.upsert({
+          where: {
+            weekId_wordId: {
+              weekId: week.id,
+              wordId: wordObj.id,
+            },
+          },
+          update: {},
+          create: {
+            weekId: week.id,
+            wordId: wordObj.id,
+          },
+        });
+        totalAdded++;
+      }
     }
+
+    safeRevalidatePath("/tingxie");
+    safeRevalidatePath("/");
+    return { success: true, count: totalAdded, unitsCount: units.length };
+  } catch (error: any) {
+    console.error("Batch import error:", error);
+    return { success: false, message: error.message || "Failed to import units" };
+  }
 }
+
+export async function saveWords(formData: FormData) {
+  const weekNumber = parseInt(formData.get("week") as string);
+  const rawContent = formData.get("content") as string;
+  const grade = parseInt((formData.get("grade") as string) || "4");
+  const term = parseInt((formData.get("term") as string) || "2");
+  const language = (formData.get("language") as string) || "zh";
+  const title = (formData.get("title") as string) || `Week ${weekNumber}`;
+
+  if (!weekNumber || !rawContent) {
+    return { success: false, message: "Missing week number or content" };
+  }
+
+  const words = rawContent
+    .split(/[\n,，]+/)
+    .map((w) => w.trim())
+    .filter((w) => w.length > 0);
+
+  if (words.length === 0) {
+    return { success: false, message: "No valid words found" };
+  }
+
+  return await importStructuredUnits([
+    {
+      number: weekNumber,
+      title,
+      grade,
+      term,
+      language,
+      items: words,
+    },
+  ]);
+}
+

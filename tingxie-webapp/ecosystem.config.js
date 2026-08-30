@@ -4,7 +4,7 @@ module.exports = {
       name: 'tingxie-webapp',
       script: 'npm',
       args: 'run start',
-      cwd: '/Users/tianluhuang/Library/CloudStorage/OneDrive-TransfongVentures/Documents/Downloads/Antigravity/Tingxie Practice/tingxie-webapp',
+      cwd: '/Users/tylerh/Documents/Antigravity/Tingxie Practice/tingxie-webapp',
       env: {
         NODE_ENV: 'production',
         PORT: 3000
