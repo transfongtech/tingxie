@@ -494,7 +494,7 @@ export function CompositionEditor({
               className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-lg text-xs font-bold transition flex items-center gap-1"
               title="Start a new paragraph with indent (Press Enter)"
             >
-              <span>↵ New Paragraph (段落首行留空)</span>
+              <span>↵ New Paragraph</span>
             </button>
 
             <button
