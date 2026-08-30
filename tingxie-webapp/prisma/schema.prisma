@@ -11,26 +11,31 @@ datasource db {
 }
 
 model Week {
-  id            Int      @id @default(autoincrement())
+  id            Int               @id @default(autoincrement())
   number        Int
-  language      String   @default("zh") // "zh" or "en"
+  language      String            @default("zh") // "zh" or "en"
+  grade         Int               @default(3) // 1 to 6 (Primary 1 - 6)
+  term          Int               @default(1) // 1 to 4 (Term 1 - 4)
   title         String
-  isActive      Boolean   @default(false)
+  isActive      Boolean           @default(false)
   startDate     DateTime?
   dictationDate DateTime? // Target date for 听写
   wordLists     WordList[]
+  sessions      PracticeSession[]
 
-  @@unique([number, language])
+  @@unique([number, language, grade, term])
 }
 
 model Word {
-  id        Int      @id @default(autoincrement())
-  content   String   @unique
-  addedAt   DateTime @default(now())
-  notes     String?
-  wordLists WordList[]
-  reviews   ReviewLog[]
-  progress  LearningProgress?
+  id              Int               @id @default(autoincrement())
+  content         String            @unique
+  addedAt         DateTime          @default(now())
+  notes           String?
+  syllableData    String? // JSON formatted syllable scaffolding data
+  wordLists       WordList[]
+  reviews         ReviewLog[]
+  progress        LearningProgress?
+  practiceResults PracticeResult[]
 }
 
 model WordList {
@@ -48,18 +53,151 @@ model ReviewLog {
   wordId     Int
   word       Word     @relation(fields: [wordId], references: [id])
   reviewDate DateTime @default(now())
-  outcome    String   // "correct" or "wrong"
-  stage      Int      // e.g., 1, 2, 4, 7...
+  outcome    String // "correct" or "wrong"
+  stage      Int // e.g., 1, 2, 4, 7...
 }
 
 model LearningProgress {
-  id             Int      @id @default(autoincrement())
-  wordId         Int      @unique
-  word           Word     @relation(fields: [wordId], references: [id])
+  id             Int       @id @default(autoincrement())
+  wordId         Int       @unique
+  word           Word      @relation(fields: [wordId], references: [id])
   nextReviewDate DateTime
-  stage          Int      @default(0) // 0=new, 1=1d, 2=2d, etc.
+  stage          Int       @default(0) // 0=new, 1=1d, 2=2d, etc.
   lastReviewDate DateTime?
-  isMastered     Boolean  @default(false)
-  
-  updatedAt      DateTime @updatedAt
+  isMastered     Boolean   @default(false)
+  updatedAt      DateTime  @updatedAt
+}
+
+model PracticeSession {
+  id          Int              @id @default(autoincrement())
+  language    String // "zh" | "en"
+  weekId      Int?
+  week        Week?            @relation(fields: [weekId], references: [id])
+  status      String           @default("completed") // "completed" | "pending_review" | "skipped"
+  startedAt   DateTime         @default(now())
+  completedAt DateTime?
+  results     PracticeResult[]
+}
+
+model PracticeResult {
+  id        Int             @id @default(autoincrement())
+  sessionId Int
+  session   PracticeSession @relation(fields: [sessionId], references: [id])
+  wordId    Int
+  word      Word            @relation(fields: [wordId], references: [id])
+  outcome   String? // "correct" | "wrong" | null (pending)
+  attempts  Int             @default(0)
+  markedBy  String? // "system" | "parent" | null
+  markedAt  DateTime?
+}
+
+model DailyStreak {
+  id        Int      @id @default(autoincrement())
+  date      String   @unique // Format: YYYY-MM-DD
+  practiced Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Achievement {
+  id         Int      @id @default(autoincrement())
+  type       String // "first_step" | "streak_3" | "streak_7" | "word_master"
+  unlockedAt DateTime @default(now())
+  metadata   String? // JSON string
+}
+
+// ─── Composition Module ─────────────────────
+
+model EssayPrompt {
+  id          Int                @id @default(autoincrement())
+  title       String // e.g. "A Day at the Park"
+  description String? // 可选文字说明
+  images      EssayPromptImage[]
+  submissions EssaySubmission[]
+  drafts      EssayDraft[]
+  createdAt   DateTime           @default(now())
+  isActive    Boolean            @default(true)
+}
+
+model EssayPromptImage {
+  id           Int         @id @default(autoincrement())
+  promptId     Int
+  prompt       EssayPrompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  imagePath    String // public/essay_prompts/{promptId}/{sortOrder}.jpg
+  originalPath String? // 原始未处理图片路径 (保留备份)
+  sortOrder    Int         @default(0)
+}
+
+// 草稿自动保存 (服务端备份层)
+model EssayDraft {
+  id        Int         @id @default(autoincrement())
+  promptId  Int
+  prompt    EssayPrompt @relation(fields: [promptId], references: [id])
+  text      String // 草稿文本
+  wordCount Int         @default(0)
+  updatedAt DateTime    @updatedAt
+  createdAt DateTime    @default(now())
+
+  @@unique([promptId]) // 每个题目只保留一份草稿
+}
+
+model EssaySubmission {
+  id                   Int             @id @default(autoincrement())
+  promptId             Int
+  prompt               EssayPrompt     @relation(fields: [promptId], references: [id])
+  essayText            String // 学生在文本框中打字输入的作文原文
+  wordCount            Int // 自动计算字数
+  status               String          @default("submitted") // "submitted" | "reviewing" | "reviewed" | "review_failed"
+  reviewLeaseId        String?
+  reviewLeaseExpiresAt DateTime?
+  submittedAt          DateTime        @default(now())
+  feedbacks            EssayFeedback[]
+}
+
+model EssayFeedback {
+  id                    Int             @id @default(autoincrement())
+  submissionId          Int
+  submission            EssaySubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  versionNumber         Int             @default(1)
+  isCurrent             Boolean         @default(true)
+  status                String          @default("success") // "success" | "failed"
+  engineVersion         String          @default("legacy")
+  promptVersion         String          @default("legacy")
+  rubricVersion         String          @default("legacy")
+  provider              String          @default("legacy")
+  model                 String          @default("legacy")
+  attemptCount          Int             @default(1)
+  inputFingerprint      String?
+  qualityMetadataJson   String?
+  reviewResultJson      String?
+  failureCode           String?
+  failureMessage        String?
+  annotations           String // JSON: Annotation[]
+  polishedText          String // 修正版全文 (保留学生故事情节)
+  contentScore          Int // 0-18
+  languageScore         Int // 0-18
+  totalScore            Int // 0-36
+  spellingErrors        Int             @default(0)
+  grammarErrors         Int             @default(0)
+  structureErrors       Int             @default(0)
+  vocabSuggestions      Int             @default(0)
+  summary               String // 英文评语
+  summaryAudioPath      String? // TTS 缓存路径
+  spellingErrorWords    String? // JSON: [{wrong, correct}]
+  contentBreakdownJson  String? // JSON: {relevance, development, plotCoherence, engagement}
+  languageBreakdownJson String? // JSON: {grammar, vocabulary, spelling, organisation}
+  createdAt             DateTime        @default(now())
+
+  @@unique([submissionId, versionNumber])
+  @@index([submissionId, isCurrent, status])
+}
+
+model Phrase {
+  id        Int      @id @default(autoincrement())
+  content   String
+  category  String
+  source    String // "ai" | "preset" | "manual"
+  language  String   @default("en")
+  createdAt DateTime @default(now())
+
+  @@unique([content, language])
 }

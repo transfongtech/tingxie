@@ -8,15 +8,45 @@
 
 @import "tailwindcss";
 
+:root {
+  /* Dyslexia-Friendly Color Palette */
+  --color-bg: #FBF7F0;          /* Warm Cream Background */
+  --color-bg-card: #FFFFFF;     /* Pure Card White */
+  --color-text: #2D2D2D;        /* Soft Dark Slate Text (avoid pure black) */
+  --color-text-muted: #6B7280;  /* Subdued Gray */
+  --color-correct: #34D399;     /* Soft Emerald Green */
+  --color-error: #FBBF24;       /* Warm Amber (no scary red X) */
+  --color-primary: #6366F1;     /* Indigo Primary */
+  --color-primary-hover: #4F46E5;
+  
+  /* Typography Tokens */
+  --font-en: "Verdana", "OpenDyslexic", system-ui, sans-serif;
+  --font-zh: "LXGW WenKai Screen", serif;
+  --font-size-base: 18px;
+  --line-height-base: 1.6;
+  --letter-spacing-base: 0.04em;
+}
+
 @theme {
-  --font-sans: "Inter", "system-ui", "sans-serif";
-  --font-kaiti: "LXGW WenKai Screen", "FangSong", "STFangsong", "Kaiti SC", "STKaiti", "AR PL UKai CN", "KaiTi", "SimKai", "MingLiU", "serif";
-  --color-primary: #4e73df;
-  --color-secondary: #858796;
+  --font-sans: var(--font-en);
+  --font-kaiti: var(--font-zh);
+  --color-primary: #6366F1;
 }
 
 @layer base {
   body {
-    @apply antialiased bg-slate-50 text-slate-900;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-en);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-base);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Accessible focus states */
+  button:focus-visible, input:focus-visible, a:focus-visible {
+    outline: 3px solid #818CF8;
+    outline-offset: 2px;
   }
 }

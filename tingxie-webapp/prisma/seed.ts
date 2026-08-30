@@ -26,7 +26,7 @@ const RECITATION_DATA = `
 3. 这时候，妈妈撑着伞，急急忙忙地赶来了。 
 
 * **默写（三）心情描写——伤心：**
-1. 她鼻子一酸，眼睛一红，不听话的眼泪顺着脸颊流了下来。 
+1. 她鼻子一酸，眼睛一红，不听话的眼泪顺着脸颊流了起来。 
 2. 我心疼得像刀割一样，眼泪忍不住地往下流，哭得像个泪人似的。 
 3. 我非常感动，眼泪就忍不住落了下来。 
 
@@ -42,121 +42,127 @@ const RECITATION_DATA = `
 `;
 
 const cnNumMap: Record<string, number> = {
-    "一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
-    "六": 6, "七": 7, "八": 8, "九": 9, "十": 10
+  "一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
+  "六": 6, "七": 7, "八": 8, "九": 9, "十": 10
 };
 
 async function main() {
-    console.log("Starting seed...");
+  console.log("Starting seed...");
 
-    // 1. Process Dictation
-    const dictLines = DICTATION_DATA.split("\n").filter(l => l.trim().length > 0);
-    for (const line of dictLines) {
-        const match = line.match(/听写（([一二三四五六七八九十]+)）《(.+)》：\*\*(.+)/) ||
-            line.match(/听写（([一二三四五六七八九十]+)）《(.+)》：\s*(.+)/);
+  const dictLines = DICTATION_DATA.split("\n").filter(l => l.trim().length > 0);
+  for (const line of dictLines) {
+    const match = line.match(/听写（([一二三四五六七八九十]+)）《(.+)》：\*\*(.+)/) ||
+      line.match(/听写（([一二三四五六七八九十]+)）《(.+)》：\s*(.+)/);
 
-        if (match) {
-            const numStr = match[1];
-            const title = match[2];
-            const contentRaw = match[3];
-            const weekNum = cnNumMap[numStr];
+    if (match) {
+      const numStr = match[1];
+      const title = match[2];
+      const contentRaw = match[3];
+      const weekNum = cnNumMap[numStr];
 
-            if (weekNum) {
-                const week = await prisma.week.upsert({
-                    where: {
-                        number_language: {
-                            number: weekNum,
-                            language: "zh"
-                        }
-                    },
-                    update: { title: `Week ${weekNum} - ${title}` },
-                    create: {
-                        number: weekNum,
-                        title: `Week ${weekNum} - ${title}`,
-                        isActive: true,
-                        language: "zh"
-                    },
-                });
-
-                const words = contentRaw.trim().split(/[,，]\s*/).map(w => w.trim()).filter(w => w);
-                for (const wordText of words) {
-                    const word = await prisma.word.upsert({
-                        where: { content: wordText },
-                        update: {},
-                        create: { content: wordText },
-                    });
-
-                    await prisma.wordList.upsert({
-                        where: { weekId_wordId: { weekId: week.id, wordId: word.id } },
-                        update: {},
-                        create: { weekId: week.id, wordId: word.id },
-                    });
-                }
-                console.log(`Processed Dictation Week ${weekNum}: ${words.length} words`);
+      if (weekNum) {
+        const week = await prisma.week.upsert({
+          where: {
+            number_language_grade_term: {
+              number: weekNum,
+              language: "zh",
+              grade: 4,
+              term: 1,
             }
+          },
+          update: { title: `听写（${numStr}）《${title}》` },
+          create: {
+            number: weekNum,
+            title: `听写（${numStr}）《${title}》`,
+            isActive: true,
+            language: "zh",
+            grade: 4,
+            term: 1,
+          },
+        });
+
+        const words = contentRaw.trim().split(/[,，]\s*/).map(w => w.trim()).filter(w => w);
+        for (const wordText of words) {
+          const word = await prisma.word.upsert({
+            where: { content: wordText },
+            update: {},
+            create: { content: wordText },
+          });
+
+          await prisma.wordList.upsert({
+            where: { weekId_wordId: { weekId: week.id, wordId: word.id } },
+            update: {},
+            create: { weekId: week.id, wordId: word.id },
+          });
         }
+        console.log(`Processed Dictation Week ${weekNum}: ${words.length} words`);
+      }
     }
+  }
 
-    // 2. Process Recitation
-    const recitationBlocks = RECITATION_DATA.split(/\* \*\*默写（/);
-    for (const block of recitationBlocks) {
-        if (!block.trim()) continue;
+  const recitationBlocks = RECITATION_DATA.split(/\* \*\*默写（/);
+  for (const block of recitationBlocks) {
+    if (!block.trim()) continue;
 
-        const firstLineEnd = block.indexOf("\n");
-        const headerObj = block.substring(0, firstLineEnd);
-        const contentObj = block.substring(firstLineEnd);
+    const firstLineEnd = block.indexOf("\n");
+    const headerObj = block.substring(0, firstLineEnd);
+    const contentObj = block.substring(firstLineEnd);
 
-        const numMatch = headerObj.match(/^([一二三四五六七八九十]+)）(.+)：/);
-        if (numMatch) {
-            const numStr = numMatch[1];
-            const topic = numMatch[2].replace(/\*\*/g, "").trim();
-            const weekNum = cnNumMap[numStr];
+    const numMatch = headerObj.match(/^([一二三四五六七八九十]+)）(.+)：/);
+    if (numMatch) {
+      const numStr = numMatch[1];
+      const topic = numMatch[2].replace(/\*\*/g, "").trim();
+      const weekNum = 100 + cnNumMap[numStr];
 
-            if (weekNum) {
-                const week = await prisma.week.upsert({
-                    where: {
-                        number_language: {
-                            number: weekNum,
-                            language: "zh"
-                        }
-                    },
-                    update: {},
-                    create: {
-                        number: weekNum,
-                        title: `Week ${weekNum}`,
-                        isActive: true,
-                        language: "zh"
-                    },
-                });
-
-                const sentences = contentObj.match(/^\d+\.\s*(.+)/gm)?.map(s => s.replace(/^\d+\.\s*/, "").trim()) || [];
-
-                for (const sent of sentences) {
-                    const word = await prisma.word.upsert({
-                        where: { content: sent },
-                        update: {},
-                        create: { content: sent, notes: `默写: ${topic}` },
-                    });
-
-                    await prisma.wordList.upsert({
-                        where: { weekId_wordId: { weekId: week.id, wordId: word.id } },
-                        update: {},
-                        create: { weekId: week.id, wordId: word.id },
-                    });
-                }
-                console.log(`Processed Recitation Week ${weekNum}: ${sentences.length} sentences`);
+      if (weekNum) {
+        const week = await prisma.week.upsert({
+          where: {
+            number_language_grade_term: {
+              number: weekNum,
+              language: "zh",
+              grade: 4,
+              term: 1,
             }
+          },
+          update: { title: `默写（${numStr}）` },
+          create: {
+            number: weekNum,
+            title: `默写（${numStr}）`,
+            isActive: true,
+            language: "zh",
+            grade: 4,
+            term: 1,
+          },
+        });
+
+        const sentences = contentObj.match(/^\d+\.\s*(.+)/gm)?.map(s => s.replace(/^\d+\.\s*/, "").trim()) || [];
+
+        for (const sent of sentences) {
+          const word = await prisma.word.upsert({
+            where: { content: sent },
+            update: {},
+            create: { content: sent, notes: `默写: ${topic}` },
+          });
+
+          await prisma.wordList.upsert({
+            where: { weekId_wordId: { weekId: week.id, wordId: word.id } },
+            update: {},
+            create: { weekId: week.id, wordId: word.id },
+          });
         }
+        console.log(`Processed Recitation Week ${weekNum}: ${sentences.length} sentences`);
+      }
     }
-    console.log("Seeding complete.");
+  }
+  console.log("Seeding complete.");
 }
 
 main()
-    .then(async () => {
-        await prisma.$disconnect();
-    })
-    .catch(async (e) => {
-        console.error(e);
-        await prisma.$disconnect();
-        process.exit(1);
-    });
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
